@@ -24,7 +24,7 @@ public class Main extends JFrame implements ActionListener {
     public static void main(String[] args) {
         //Pretty standard graphics setup
         JFrame f = new JFrame();
-        f.setSize(400,400);
+        f.setSize(400, 440);
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         f.addKeyListener(new KeyListener() { //This KeyListener is what allows movement inputs to be detected.
             //If a key is held down during the tick, then the corresponding movement boolean will be true.

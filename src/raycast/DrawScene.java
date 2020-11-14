@@ -20,6 +20,8 @@ public class DrawScene extends JPanel {
     private double playerX;
     private double playerY;
     private int playerRotation = 0; //This is in degrees so that I can just use an int.
+    private Maze maze = new Maze(25, 25);
+    private int[][] mazeWalls = maze.getMaze();
 
     public DrawScene(double x, double y) {
         this.playerX = x;
@@ -60,9 +62,17 @@ public class DrawScene extends JPanel {
         Graphics2D g2d = (Graphics2D) g;
         // g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); /* We can turn this on later if necessary */
         g2d.setColor(Color.WHITE);
-        g2d.rotate(Math.toRadians(playerRotation), (int)playerX + 10, (int)playerY + 10);
-        g2d.fillRect((int)playerX, (int)playerY, 20, 20);
-        g2d.drawLine((int)playerX + 10, (int)playerY + 10, (int)playerX + 10, (int)playerY - 10);
+        for (int i = 0; i < 25; i++) { //This displays the maze graphically
+            for (int j = 0; j < 25; j++) {
+                if (mazeWalls[i][j] == 1) {
+                    g2d.fillRect(j * 16, i * 16, 15, 15);
+                }
+            }
+        }
+        g2d.setColor(Color.RED);
+        g2d.rotate(Math.toRadians(playerRotation), (int)playerX + 8, (int)playerY + 8);
+        g2d.fillRect((int)playerX, (int)playerY, 16, 16);
+        g2d.drawLine((int)playerX + 8, (int)playerY + 8, (int)playerX + 8, (int)playerY - 8);
     }
 
 }
