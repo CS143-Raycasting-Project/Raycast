@@ -21,7 +21,7 @@ public class Main extends JFrame implements ActionListener {
     public static int resolution = 400;
     public static int cellSize = resolution / mazeSize;
     private static boolean left, right, backwards, forwards, turnLeft, turnRight, render = false; //These will be used for the movement, and render will be used to determine whether or not a freame needs to be rendered
-    private static Scene scene = new Scene(200.0, 200.0); //Calls to the graphics function to draw the scene
+    private static Scene scene = new Scene(resolution / 2, resolution / 2); //Calls to the graphics function to draw the scene
     static Timer keyTimer = new Timer(10, new Main()); //This is the clock of the game. It runs a tick every 10ms
     public static void main(String[] args) {
         //Pretty standard graphics setup
