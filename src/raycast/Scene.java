@@ -24,7 +24,7 @@ public class Scene extends JPanel {
     public static Maze maze = new Maze(Main.mazeSize, Main.mazeSize);
     private static BufferedImage miniMap = maze.getMiniMap();
     private int[][] mazeWalls = maze.getMaze();
-    private int rayCastScreenPixelColumns = 1280;
+    private int rayCastScreenPixelColumns = Main.windowX;
     public Scene(double x, double y) {
         this.playerX = x;
         this.playerY = y;
