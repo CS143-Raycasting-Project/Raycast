@@ -22,7 +22,7 @@ public class Scene extends JPanel {
     private int playerRotation = 0; //This is in degrees so that I can just use an int.
     public static Maze maze = new Maze(Main.mazeSize, Main.mazeSize);
     private int[][] mazeWalls = maze.getMaze();
-    private int rayCastScreenPixelColumns = 720;
+    private int rayCastScreenPixelColumns = 1280;
     public Scene(double x, double y) {
         this.playerX = x;
         this.playerY = y;
@@ -60,12 +60,12 @@ public class Scene extends JPanel {
         super.paintComponent(g);
         this.setBackground(Color.BLACK);
         Graphics2D g2d = (Graphics2D) g;
-        // g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); /* We can turn this on later if necessary */
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); /* We can turn this on later if necessary */
         g2d.setColor(Color.WHITE);
         for (int i = 0; i < Main.mazeSize; i++) { //This displays the maze graphically
             for (int j = 0; j < Main.mazeSize; j++) {
                 if (Main.raymap.findTurfByIndex(i,j).turfType == 1) {
-                    g2d.fillRect(j * Main.cellSize, i * Main.cellSize, Main.cellSize, Main.cellSize);
+                    g2d.fillRect(Main.resolution + j * Main.cellSize / 4, i * Main.cellSize / 4, Main.cellSize / 4, Main.cellSize / 4);
                 }
                 /*if (Main.raymap.findTurfByIndex(i,j).isSpecial == true) {//highlight special turfs (turfs that are hit by rays, for testing)
                     g2d.setColor(Color.BLUE);
@@ -73,21 +73,31 @@ public class Scene extends JPanel {
                     g2d.setColor(Color.WHITE);
                 }//*/
             }
-        } 
-        g2d.setColor(Color.RED);
-        g2d.rotate(Math.toRadians(playerRotation), (int)playerX + Main.cellSize / 2, (int)playerY + Main.cellSize / 2);
-        g2d.fillRect((int)playerX, (int)playerY, Main.cellSize, Main.cellSize);
+        }//*/ 
+        Ray pixel;
+        double collision;
         for (int i = 0; i < rayCastScreenPixelColumns; i++) {
             double cameraX = 2 * i / (double)rayCastScreenPixelColumns - 1;
-            new Ray(playerY / (double)Main.cellSize, playerX / (double)Main.cellSize, Math.toRadians(180-playerRotation), cameraX);
+            pixel = new Ray(playerY / (double)Main.cellSize, playerX / (double)Main.cellSize, Math.toRadians(180-playerRotation), cameraX);
+            collision = pixel.findCollision();
+            if(255 - (int)collision * 15 >= 0) {
+                g2d.setColor(new Color(255 - (int)collision * 15, 0, 0));
+            }
+            else {
+                g2d.setColor(Color.BLACK);
+            }
+            g2d.drawLine(i, (int)(Main.resolution * 9 / 16 / 2 - 1 / collision / Main.cellSize * 720 * 10), i, (int)(Main.resolution * 9 / 16 / 2 + 1 / collision / Main.cellSize * 720 * 10));
             //as of right now you need to switch x and y, i dont know why. you also need to subtract player rotation from 180 degrees
             //and turn it to radians
         }
+        g2d.setColor(Color.RED);
+        g2d.rotate(Math.toRadians(playerRotation), 1280 + playerX / 4 + Main.cellSize / 8, playerY / 4 + Main.cellSize / 8);
+        g2d.fillRect((int)(1280 + playerX / 4), (int)(playerY / 4), Main.cellSize / 4, Main.cellSize / 4);
         double end = System.nanoTime();
         //System.out.println((double)(end - start)/1000000); //with 4000 rays it should take between 0.8 and 1.3 MILLISECONDS per frame
         
 
-        g2d.drawLine((int)playerX + Main.cellSize / 2, (int)playerY + Main.cellSize / 2, (int)playerX + Main.cellSize / 2, (int)playerY - Main.cellSize / 2);
+        // g2d.drawLine((int)playerX + Main.cellSize / 2, (int)playerY + Main.cellSize / 2, (int)playerX + Main.cellSize / 2, (int)playerY - Main.cellSize / 2);
     }
 
 }
