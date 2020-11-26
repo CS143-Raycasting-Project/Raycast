@@ -105,6 +105,6 @@ public class Ray {
      */
     public int getWallX(int textureSize) {
         // System.out.println(collisionCoord % 1 * textureSize);
-        return (int)(collisionCoord % 1 * textureSize);
+        return (int)(collisionCoord % 1 * textureSize); //TODO: Fix the way this reverses the texture on some walls
     }
 } 
