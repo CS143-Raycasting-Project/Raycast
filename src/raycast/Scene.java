@@ -14,7 +14,6 @@ package raycast;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.*;
 import javax.swing.*;
 
 @SuppressWarnings("serial")
@@ -24,20 +23,15 @@ public class Scene extends JPanel {
     private double playerY;
     private int playerRotation = 0; //This is in degrees so that I can just use an int.
     public static Maze maze = new Maze(Main.mazeSize, Main.mazeSize);
-    // private static ArrayList<Texture> wallTexture = new ArrayList<>();
     private static Texture wallTexture = new Texture("assets" + File.separator + "textures" + File.separator + "RedCobblestoneWall.png", 1280);//Make sure your terminal is IN the Raycast folder
+    private static Texture startTexture = new Texture("assets" + File.separator + "textures" + File.separator + "RedCobblestoneDoor.png", 1280);
+    private static Texture exitTexture = new Texture("assets" + File.separator + "textures" + File.separator + "RedCobblestoneExit.png", 1280);
     private static BufferedImage miniMap = maze.getMiniMap();
     private int[][] mazeWalls = maze.getMaze();
     private int rayCastScreenPixelColumns = Main.windowX;
     public Scene(double x, double y) {
         this.playerX = x;
         this.playerY = y;
-        // wallTexture.add(new Texture("assets" + File.separator + "textures" + File.separator + "RedBrickWall.png", 1280));
-        // wallTexture.add(new Texture("assets" + File.separator + "textures" + File.separator + "RedBrickWall640.png", 640));
-        // wallTexture.add(new Texture("assets" + File.separator + "textures" + File.separator + "RedBrickWall320.png", 320));
-        // wallTexture.add(new Texture("assets" + File.separator + "textures" + File.separator + "RedBrickWall160.png", 160));
-        // wallTexture.add(new Texture("assets" + File.separator + "textures" + File.separator + "RedBrickWall80.png", 80));
-        // wallTexture.add(new Texture("assets" + File.separator + "textures" + File.separator + "RedBrickWall40.png", 40));
     }
     public void move(String direction) { //I use some simple trig here to change how the movement is done depending on rotation.
         if (direction.equals("left")) {
@@ -73,6 +67,7 @@ public class Scene extends JPanel {
         super.paintComponent(g);
         this.setBackground(Color.BLACK);
         Graphics2D g2d = (Graphics2D) g;
+        // g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); /* This is antialiasing. We can turn this on later if necessary */
         g2d.setColor(Color.WHITE);
         Ray pixel;
         double collision;
@@ -80,9 +75,10 @@ public class Scene extends JPanel {
         int textureX;
         int textureY;
         int pixelColor;
-        Texture currentTexture = wallTexture;
-        BufferedImage screen = new BufferedImage(Main.windowX, Main.windowY, BufferedImage.TYPE_INT_RGB);
+        Texture currentTexture = wallTexture; //When we have a designated start and end cell, this will have an if statement to display the textures for the start and end
+        BufferedImage screen = new BufferedImage(Main.windowX, Main.windowY, BufferedImage.TYPE_INT_RGB); //This will be used to render the walls pixel by pixel
         Graphics s = screen.getGraphics();
+        //Sets the floor and ceiling to their colors
         s.setColor(new Color(50, 50, 50));
         s.fillRect(0, 0, Main.windowX, Main.windowY / 2);
         s.setColor(Color.GRAY);
@@ -94,43 +90,14 @@ public class Scene extends JPanel {
             collision = pixel.findCollision();
             //How tall the column of pixels will be at x. We use the inverse of the collision distance because as the distance increases,
             //the height of the column should decrease. This is then multiplied by the window height and scaled by 40
-            columnHeight = (int)(1 / collision / Main.cellSize * Main.windowY * 30);
-            if(255 - (int)(collision * 15) >= 0) { //This if statement makes sure that the lowest brightness a color can be is black
-                g2d.setColor(new Color(255 - (int)(collision * 15), 0, 0));
-            }
-            else {
-                g2d.setColor(Color.BLACK);
-            }
-            //This draws the column of pixels on the x value; it's on based on the distance from the collision
-            // g2d.drawLine(x, Main.windowY / 2 - columnHeight, x, Main.windowY / 2 + columnHeight);
-            // if (columnHeight >= 1280 * .75) {
-            //     currentTexture = wallTexture.get(0);
-            // }
-            // else if (columnHeight >= 640 * .75) {
-            //     currentTexture = wallTexture.get(1);
-            // }
-            // else if (columnHeight >= 320 * .75) {
-            //     currentTexture = wallTexture.get(2);
-            // }
-            // else if (columnHeight >= 160 * .75) {
-            //     currentTexture = wallTexture.get(3);
-            // }
-            // else if (columnHeight >= 80 * .75){
-            //     currentTexture = wallTexture.get(4);
-            // }
-            // else {
-            //     currentTexture = wallTexture.get(5);
-            // }
+            columnHeight = (int)(1 / collision / Main.cellSize * Main.windowY * 30 * ((double)Main.windowX / 1280));
             textureX = pixel.getWallX(currentTexture.size);
             // System.out.println(textureX);
+            //This handles texture mapping by scaling the image down to the appropriate size for each pixel
             for(int y = 0; y < columnHeight; y++) {
                 textureY = y * currentTexture.size / columnHeight;
                 if ((Main.windowY - columnHeight) / 2 + y >= 0 && (Main.windowY - columnHeight) / 2 + y <= Main.windowY - 1){
-                    // System.out.println(currentTexture.pixels[textureX + textureY * currentTexture.size]);
-                    pixelColor = currentTexture.pixels[textureX + textureY * currentTexture.size];
-                    for (int i = 0; i < 1 / columnHeight * 10000; i++) {
-                        pixelColor = ((pixelColor & 0x7E7E7E) >> 1);
-                    }
+                    pixelColor = currentTexture.pixels[textureX + textureY * currentTexture.size]; //I'd like to figure out how to decrease the brightness of a hex RGB value and use it for lighting
                     screen.setRGB(x, (Main.windowY - columnHeight) / 2 + y, pixelColor);
                 }
             }
@@ -160,7 +127,6 @@ public class Scene extends JPanel {
         g2d.rotate(-Math.toRadians(180 - playerRotation), Main.windowX / 5 / 2 + Main.windowX / 64, Main.windowX / 5 / 2 + Main.windowX / 64);
         g2d.fillRect(Main.windowX / 5 / 2 + Main.windowX / 64 - Main.cellSize / 8, Main.windowX / 5 / 2 + Main.windowX / 64 - Main.cellSize / 8, Main.cellSize / 4, Main.cellSize / 4);
         //Used for timing the length it takes to render a frame
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); /* This is antialiasing. We can turn this on later if necessary */
         double end = System.nanoTime();
         // System.out.println((double)(end - start)/1000000); //with 4000 rays it should take between 0.8 and 1.3 MILLISECONDS per frame
     }

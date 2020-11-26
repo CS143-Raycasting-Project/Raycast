@@ -25,7 +25,6 @@ public class Texture {
         try {
             BufferedImage texture = ImageIO.read(new File(filePath));
             texture.getRGB(0, 0, size, size, pixels, 0, size);
-            System.out.println("Texture loaded");
         }
         catch (Exception e) {
             e.printStackTrace();
