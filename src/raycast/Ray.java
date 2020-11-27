@@ -101,17 +101,6 @@ public class Ray {
     public int getWallX(int textureSize) { //TODO: Fix the way this reverses the texture on some walls
         //This still isn't fixed and I need to find out why
         // System.out.println(collisionCoord % 1 * textureSize);
-        if (playerTurfYIndex < x) {
-            playerTurfYIndex ++;
-        }
-        if (currentTurfXIndex < y) {
-            currentTurfXIndex ++;
-        }
-        if (x > playerTurfYIndex || y > currentTurfXIndex) {
-            return (int)(collisionCoord % 1 * textureSize);
-        }
-        else {  
-            return (int)((1 - (collisionCoord % 1)) * textureSize);
-        }
+        return (int)(collisionCoord % 1 * textureSize);
     }
 } 
