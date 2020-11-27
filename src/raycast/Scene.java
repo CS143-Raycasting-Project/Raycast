@@ -15,13 +15,14 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.io.File;
+import java.util.Arrays;
+
 import javax.swing.*;
 
 @SuppressWarnings("serial")
 public class Scene extends JPanel {
     //Points were causing rounding issues, so I just made the coords 2 separate doubles.
-    private double playerX;
-    private double playerY;
+    private double[] playerCoords; // {x, y}
     public static int playerRotation = 0; //This is in degrees so that I can just use an int.
     public static Maze maze = new Maze(Main.mazeSize, Main.mazeSize);
     private static Texture wallTexture = new Texture("assets" + File.separator + "textures" + File.separator + "RedCobblestoneWall.png", 1280);//Make sure your terminal is IN the Raycast folder
@@ -34,8 +35,7 @@ public class Scene extends JPanel {
     private int[][] mazeWalls = maze.getMaze();
     private int rayCastScreenPixelColumns = Main.windowX;
     public Scene(double x, double y) {
-        this.playerX = x;
-        this.playerY = y;
+        this.playerCoords = new double[] {x, y};
     }
     public void move(Main.Movement direction) { //I use some simple trig here to change how the movement is done depending on rotation.
         switch (direction) {
@@ -70,8 +70,9 @@ public class Scene extends JPanel {
             Main.playerVector = rotateVector(-45);
             break;
         }
-        playerX += Main.playerVector[0];
-        playerY += Main.playerVector[1];
+        Main.playerVector = collisionChecked(playerCoords, Main.playerVector);
+        playerCoords[0] += Main.playerVector[0];
+        playerCoords[1] += Main.playerVector[1];
     }
 
     private static double[] rotateVector(double rotation) {
@@ -79,6 +80,30 @@ public class Scene extends JPanel {
         rotatedVector[0] = Main.moveSpeed * Math.cos(Math.toRadians(playerRotation + rotation));
         rotatedVector[1] = Main.moveSpeed * Math.sin(Math.toRadians(playerRotation + rotation));
         return rotatedVector;
+    }
+
+    /**
+     * {x, y} format
+     * @param coords of entity to check for collision
+     * @param vector The entity's current movement vector 
+     * @return new vector corrected for collision
+     */
+    public double[] collisionChecked(double[] coords, double[] vector) {
+
+        int currentXCell = (int) coords[0] / Main.cellSize;
+        int futureXCell = (int) (coords[0] + vector[0]) / Main.cellSize;
+        int currentYCell = (int) coords[1] / Main.cellSize;
+        int futureYCell = (int) (coords[1] + vector[1]) / Main.cellSize;
+
+        if(Maze.findTurfByIndex((int) currentYCell, futureXCell).getType() == 1) {
+            //System.out.println("X Collision!");
+            vector[0] = 0;
+        }
+        if(Maze.findTurfByIndex(futureYCell, currentXCell).getType() == 1) {
+            //System.out.println("Y Collision!");
+            vector[1] = 0;
+        }
+        return vector;
     }
 
     public void rotate(int angle) {
@@ -113,7 +138,7 @@ public class Scene extends JPanel {
         //This does the collision calculations and renders the scene in 3D
         for (int x = 0; x < rayCastScreenPixelColumns; x++) {
             double cameraX = 2 * x / (double)rayCastScreenPixelColumns - 1;
-            pixel = new Ray(playerY / (double)Main.cellSize, playerX / (double)Main.cellSize, Math.toRadians(180-playerRotation), cameraX);
+            pixel = new Ray(playerCoords[1] / (double)Main.cellSize, playerCoords[0] / (double)Main.cellSize, Math.toRadians(180-playerRotation), cameraX);
             collision = pixel.findCollision();
             //How tall the column of pixels will be at x. We use the inverse of the collision distance because as the distance increases,
             //the height of the column should decrease. This is then multiplied by the window height and scaled by 40
@@ -149,7 +174,7 @@ public class Scene extends JPanel {
         //Draws the circle that makes the border of the minimap
         g2d.fillOval(Main.windowX / 64 - Main.windowX / 256, Main.windowX / 64 - Main.windowX / 256, Main.windowX / 5 + Main.windowX / 128, Main.windowX / 5 + Main.windowX / 128);
         //This is how I'm able to rotate and move the minimap inside a bounded circle. It allows you to map a BufferedImage to a rectangle, and then paint a shape with the part of the image that would be there.
-        TexturePaint miniMapPaint = new TexturePaint(miniMap, new Rectangle((int)(playerX - Main.windowX - Main.cellSize * 4) / 2 + Main.windowX / 5 / 2 + Main.windowX / 64, (int)(playerY - Main.windowX - Main.cellSize * 4) / 2 + Main.windowX / 5 / 2 + Main.windowX / 64, -(Main.windowX + Main.cellSize * 8) / 2, -(Main.windowX + Main.cellSize * 8) / 2));
+        TexturePaint miniMapPaint = new TexturePaint(miniMap, new Rectangle((int)(playerCoords[0] - Main.windowX - Main.cellSize * 4) / 2 + Main.windowX / 5 / 2 + Main.windowX / 64, (int)(playerCoords[1] - Main.windowX - Main.cellSize * 4) / 2 + Main.windowX / 5 / 2 + Main.windowX / 64, -(Main.windowX + Main.cellSize * 8) / 2, -(Main.windowX + Main.cellSize * 8) / 2));
         //Sets the paint used by g2d to the TexturePaint of the miniMap image
         g2d.setPaint(miniMapPaint);
         //This controls the rotation of the miniMap image, and it is centered on the center point of the circle that bounds it
@@ -162,7 +187,7 @@ public class Scene extends JPanel {
         g2d.fillRect(Main.windowX / 5 / 2 + Main.windowX / 64 - Main.cellSize / 8, Main.windowX / 5 / 2 + Main.windowX / 64 - Main.cellSize / 8, Main.cellSize / 4, Main.cellSize / 4);
         //Used for timing the length it takes to render a frame
         double end = System.nanoTime();
-        System.out.println((double)(end - start)/1000000); //with 4000 rays it should take between 0.8 and 1.3 MILLISECONDS per frame
+        //System.out.println((double)(end - start)/1000000); //with 4000 rays it should take between 0.8 and 1.3 MILLISECONDS per frame
     }
 
 }
