@@ -17,7 +17,6 @@ import javax.swing.Timer;
 
 @SuppressWarnings("serial")
 public class Main extends JFrame implements ActionListener {
-    private static JFrame f;
     public static int mazeSize;
     public static int windowY = 720; //Keep this at a standard round 16:9 resolution (144p, 360p, 450p, 720p, 1080p, etc.) but make sure it is smaller than your monitor resolution. (480p does not work because the width is actually fractional and just rounded up in real life)
     public static int windowX = windowY * 16 / 9; //Sets the X of the window based on a 16:9 aspect ratio
@@ -35,15 +34,15 @@ public class Main extends JFrame implements ActionListener {
     public static double runSpeed;
     public static int rotateSpeed = 2;
     enum Movement {
-        FL, F, FR,
-        L,      R,
-        BL, B, BR
+        FL, F, FR, //Front Left, Front, Front Right
+        L,      R, //Left,              Right
+        BL, B, BR  //Back Left,  Back,  Back Right
     }
     Movement currentMove;
     public static double[] playerVector = {0, 0}; // {x, y}
     public static void main(String[] args) {
         //Pretty standard graphics setup
-        f = new JFrame();
+        JFrame f = new JFrame();
         //This might be irrelevant now, btw. Say something in the group chat about it when you test it and find where you need to have the right border end to see the whole scene
         /* For whatever reason the same settings dont work for all of us, so each of us will get their own setSize bar and they comment it out 
         for everyone else, when you merge a pr dont worry about it, just set it to what works for you and dont touch the commented out ones.
