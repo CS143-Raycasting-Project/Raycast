@@ -51,9 +51,9 @@ public class Scene extends JPanel {
     public static Color color;
 
     public static int[][] inventory = {
+        {1, 2, 0, 0, 0},
         {0, 0, 0, 0, 0},
-        {0, 1, 0, 0, 0},
-        {0, 0, 0, 2, 0}
+        {0, 0, 0, 0, 0}
     };  
 
     public Scene() {
